@@ -1,6 +1,8 @@
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
@@ -87,16 +89,39 @@ public class TODOApp extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("TODO List Application");
+        primaryStage.setTitle("Grinder TODO Application");
 
-        // Layout
+        // Welcome Screen
+        VBox welcomeRoot = new VBox(20);
+        welcomeRoot.setStyle("-fx-alignment: center; -fx-background-color: #2b2b2b;");
+
+
+        ImageView backgroundImage = new ImageView(new Image("file:background.jpg"));
+        backgroundImage.setFitWidth(800);
+        backgroundImage.setFitHeight(400);
+        backgroundImage.setPreserveRatio(false);
+
+        Button startButton = new Button("Let's Start");
+        startButton.setStyle("-fx-background-color: #4da1a4; " +
+                      "-fx-text-fill: white; " +
+                      "-fx-font-size: 16px; " +
+                      "-fx-font-weight: bold; " +   // Makes the text bold
+                      "-fx-background-radius: 30px; " +   // Adjust this value to control roundness
+                      "-fx-padding: 10px 50px; " +        // Padding to make the button larger
+                      "-fx-alignment: center;");
+        
+        welcomeRoot.getChildren().addAll(backgroundImage, startButton);
+
+        Scene welcomeScene = new Scene(welcomeRoot, 800, 400);
+
+        // Main Application Screen
         VBox root = new VBox(10);
         root.setPadding(new javafx.geometry.Insets(10));
+        root.setStyle("-fx-background-color: black; -fx-padding: 20px;");
 
-        // Task List
         ListView<Task> taskListView = new ListView<>();
+        taskListView.setStyle("-fx-control-inner-background: black; -fx-text-fill: white;");
 
-        // Input Fields
         TextField titleField = new TextField();
         titleField.setPromptText("Task Title");
 
@@ -113,8 +138,8 @@ public class TODOApp extends Application {
         DatePicker dueDatePicker = new DatePicker();
         dueDatePicker.setPromptText("Due Date");
 
-        // Buttons
         Button addButton = new Button("Add Task");
+        addButton.setStyle("-fx-background-color: red; -fx-text-fill: white;");
         addButton.setOnAction(e -> {
             String title = titleField.getText();
             String description = descriptionField.getText();
@@ -139,6 +164,7 @@ public class TODOApp extends Application {
         });
 
         Button deleteButton = new Button("Delete Task");
+        deleteButton.setStyle("-fx-background-color: red; -fx-text-fill: white;");
         deleteButton.setOnAction(e -> {
             Task selectedTask = taskListView.getSelectionModel().getSelectedItem();
             if (selectedTask != null) {
@@ -149,33 +175,17 @@ public class TODOApp extends Application {
             }
         });
 
-        Button editButton = new Button("Edit Task");
-        editButton.setOnAction(e -> {
-            Task selectedTask = taskListView.getSelectionModel().getSelectedItem();
-            if (selectedTask != null) {
-                showEditTaskPopup(selectedTask, taskListView);
-            } else {
-                showAlert("Error", "No task selected!");
-            }
-        });
+        HBox inputFields = new HBox(10, titleField, descriptionField, priorityBox, categoryField, dueDatePicker, addButton, deleteButton);
+        inputFields.setStyle("-fx-background-color: #333; -fx-padding: 10px; -fx-border-color: red; -fx-border-width: 2px;");
 
-        Button openButton = new Button("Open Task");
-        openButton.setOnAction(e -> {
-            Task selectedTask = taskListView.getSelectionModel().getSelectedItem();
-            if (selectedTask != null) {
-                showTaskDetailsPopup(selectedTask);
-            } else {
-                showAlert("Error", "No task selected!");
-            }
-        });
-
-        // Layout Arrangement
-        HBox inputFields = new HBox(10, titleField, descriptionField, priorityBox, categoryField, dueDatePicker, addButton, deleteButton, editButton, openButton);
         root.getChildren().addAll(taskListView, inputFields);
 
-        // Scene
-        Scene scene = new Scene(root, 900, 400);
-        primaryStage.setScene(scene);
+        Scene mainScene = new Scene(root, 800, 400);
+
+        // Button to navigate to main screen
+        startButton.setOnAction(e -> primaryStage.setScene(mainScene));
+
+        primaryStage.setScene(welcomeScene);
         primaryStage.show();
     }
 
@@ -183,65 +193,6 @@ public class TODOApp extends Application {
         taskListView.getItems().clear();
         tasks.sort(Comparator.comparing(Task::getPriority));
         taskListView.getItems().addAll(tasks);
-    }
-
-    private void showEditTaskPopup(Task task, ListView<Task> taskListView) {
-        Stage editStage = new Stage();
-        editStage.setTitle("Edit Task");
-
-        VBox editRoot = new VBox(10);
-        editRoot.setPadding(new javafx.geometry.Insets(10));
-
-        TextField titleField = new TextField(task.getTitle());
-        TextField descriptionField = new TextField(task.getDescription());
-        ComboBox<String> priorityBox = new ComboBox<>();
-        priorityBox.getItems().addAll("High", "Medium", "Low");
-        priorityBox.setValue(task.getPriority());
-        TextField categoryField = new TextField(task.getCategory());
-        DatePicker dueDatePicker = new DatePicker();
-        if (!task.getDueDate().equals("Not Set")) {
-            dueDatePicker.setValue(java.time.LocalDate.parse(task.getDueDate()));
-        }
-
-        Button saveButton = new Button("Save");
-        saveButton.setOnAction(e -> {
-            task.setTitle(titleField.getText());
-            task.setDescription(descriptionField.getText());
-            task.setPriority(priorityBox.getValue());
-            task.setCategory(categoryField.getText());
-            task.setDueDate((dueDatePicker.getValue() != null) ? dueDatePicker.getValue().toString() : "Not Set");
-            updateTaskList(taskListView);
-            editStage.close();
-        });
-
-        editRoot.getChildren().addAll(new Label("Title"), titleField, new Label("Description"), descriptionField, new Label("Priority"), priorityBox, new Label("Category"), categoryField, new Label("Due Date"), dueDatePicker, saveButton);
-
-        Scene editScene = new Scene(editRoot, 300, 450);
-        editStage.setScene(editScene);
-        editStage.show();
-    }
-
-    private void showTaskDetailsPopup(Task task) {
-        Stage detailsStage = new Stage();
-        detailsStage.setTitle("Task Details");
-
-        VBox detailsRoot = new VBox(10);
-        detailsRoot.setPadding(new javafx.geometry.Insets(10));
-
-        Label titleLabel = new Label("Title: " + task.getTitle());
-        Label descriptionLabel = new Label("Description: " + task.getDescription());
-        Label priorityLabel = new Label("Priority: " + task.getPriority());
-        Label categoryLabel = new Label("Category: " + task.getCategory());
-        Label dueDateLabel = new Label("Due Date: " + task.getDueDate());
-
-        Button closeButton = new Button("Close");
-        closeButton.setOnAction(e -> detailsStage.close());
-
-        detailsRoot.getChildren().addAll(titleLabel, descriptionLabel, priorityLabel, categoryLabel, dueDateLabel, closeButton);
-
-        Scene detailsScene = new Scene(detailsRoot, 300, 250);
-        detailsStage.setScene(detailsScene);
-        detailsStage.show();
     }
 
     private void showAlert(String title, String message) {
