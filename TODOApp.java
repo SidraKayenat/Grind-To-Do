@@ -16,13 +16,15 @@ class Task {
     private String description;
     private String priority; // High, Medium, Low
     private String category;
+    private String dueDate;
 
-    public Task(String title, String description, String priority, String category) {
+    public Task(String title, String description, String priority, String category, String dueDate) {
         this.id = ++idCounter;
         this.title = title;
         this.description = description;
         this.priority = priority;
         this.category = category;
+        this.dueDate = dueDate;
     }
 
     public int getId() {
@@ -61,9 +63,17 @@ class Task {
         this.category = category;
     }
 
+    public String getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(String dueDate) {
+        this.dueDate = dueDate;
+    }
+
     @Override
     public String toString() {
-        return String.format("[%s] %s - %s (%s)", priority, title, description, category);
+        return String.format("[%s] %s - %s (%s) Due: %s", priority, title, description, category, dueDate);
     }
 }
 
@@ -100,6 +110,9 @@ public class TODOApp extends Application {
         TextField categoryField = new TextField();
         categoryField.setPromptText("Category");
 
+        DatePicker dueDatePicker = new DatePicker();
+        dueDatePicker.setPromptText("Due Date");
+
         // Buttons
         Button addButton = new Button("Add Task");
         addButton.setOnAction(e -> {
@@ -107,13 +120,14 @@ public class TODOApp extends Application {
             String description = descriptionField.getText();
             String priority = priorityBox.getValue();
             String category = categoryField.getText();
+            String dueDate = (dueDatePicker.getValue() != null) ? dueDatePicker.getValue().toString() : "Not Set";
 
             if (title.isEmpty() || priority == null || category.isEmpty()) {
                 showAlert("Error", "Please fill in all fields!");
                 return;
             }
 
-            Task task = new Task(title, description, priority, category);
+            Task task = new Task(title, description, priority, category, dueDate);
             tasks.add(task);
             updateTaskList(taskListView);
 
@@ -121,6 +135,7 @@ public class TODOApp extends Application {
             descriptionField.clear();
             priorityBox.getSelectionModel().clearSelection();
             categoryField.clear();
+            dueDatePicker.setValue(null);
         });
 
         Button deleteButton = new Button("Delete Task");
@@ -155,11 +170,11 @@ public class TODOApp extends Application {
         });
 
         // Layout Arrangement
-        HBox inputFields = new HBox(10, titleField, descriptionField, priorityBox, categoryField, addButton, deleteButton, editButton, openButton);
+        HBox inputFields = new HBox(10, titleField, descriptionField, priorityBox, categoryField, dueDatePicker, addButton, deleteButton, editButton, openButton);
         root.getChildren().addAll(taskListView, inputFields);
 
         // Scene
-        Scene scene = new Scene(root, 800, 400);
+        Scene scene = new Scene(root, 900, 400);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -183,6 +198,10 @@ public class TODOApp extends Application {
         priorityBox.getItems().addAll("High", "Medium", "Low");
         priorityBox.setValue(task.getPriority());
         TextField categoryField = new TextField(task.getCategory());
+        DatePicker dueDatePicker = new DatePicker();
+        if (!task.getDueDate().equals("Not Set")) {
+            dueDatePicker.setValue(java.time.LocalDate.parse(task.getDueDate()));
+        }
 
         Button saveButton = new Button("Save");
         saveButton.setOnAction(e -> {
@@ -190,13 +209,14 @@ public class TODOApp extends Application {
             task.setDescription(descriptionField.getText());
             task.setPriority(priorityBox.getValue());
             task.setCategory(categoryField.getText());
+            task.setDueDate((dueDatePicker.getValue() != null) ? dueDatePicker.getValue().toString() : "Not Set");
             updateTaskList(taskListView);
             editStage.close();
         });
 
-        editRoot.getChildren().addAll(new Label("Title"), titleField, new Label("Description"), descriptionField, new Label("Priority"), priorityBox, new Label("Category"), categoryField, saveButton);
+        editRoot.getChildren().addAll(new Label("Title"), titleField, new Label("Description"), descriptionField, new Label("Priority"), priorityBox, new Label("Category"), categoryField, new Label("Due Date"), dueDatePicker, saveButton);
 
-        Scene editScene = new Scene(editRoot, 300, 400);
+        Scene editScene = new Scene(editRoot, 300, 450);
         editStage.setScene(editScene);
         editStage.show();
     }
@@ -212,13 +232,14 @@ public class TODOApp extends Application {
         Label descriptionLabel = new Label("Description: " + task.getDescription());
         Label priorityLabel = new Label("Priority: " + task.getPriority());
         Label categoryLabel = new Label("Category: " + task.getCategory());
+        Label dueDateLabel = new Label("Due Date: " + task.getDueDate());
 
         Button closeButton = new Button("Close");
         closeButton.setOnAction(e -> detailsStage.close());
 
-        detailsRoot.getChildren().addAll(titleLabel, descriptionLabel, priorityLabel, categoryLabel, closeButton);
+        detailsRoot.getChildren().addAll(titleLabel, descriptionLabel, priorityLabel, categoryLabel, dueDateLabel, closeButton);
 
-        Scene detailsScene = new Scene(detailsRoot, 300, 200);
+        Scene detailsScene = new Scene(detailsRoot, 300, 250);
         detailsStage.setScene(detailsScene);
         detailsStage.show();
     }
