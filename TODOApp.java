@@ -91,6 +91,9 @@ public class TODOApp extends Application {
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Grinder TODO Application");
 
+        // Set the app to full screen
+    primaryStage.setFullScreen(true);
+
         // Welcome Screen
         VBox welcomeRoot = new VBox(20);
         welcomeRoot.setStyle("-fx-alignment: center; -fx-background-color: #2b2b2b;");
@@ -114,6 +117,7 @@ public class TODOApp extends Application {
 
         Scene welcomeScene = new Scene(welcomeRoot, 800, 400);
 
+        
         // Main Application Screen
         VBox root = new VBox(10);
         root.setPadding(new javafx.geometry.Insets(10));
@@ -139,7 +143,7 @@ public class TODOApp extends Application {
         dueDatePicker.setPromptText("Due Date");
 
         Button addButton = new Button("Add Task");
-        addButton.setStyle("-fx-background-color: red; -fx-text-fill: white;");
+        addButton.setStyle("-fx-background-color: #4da1a4; -fx-text-fill: white;");
         addButton.setOnAction(e -> {
             String title = titleField.getText();
             String description = descriptionField.getText();
@@ -164,7 +168,7 @@ public class TODOApp extends Application {
         });
 
         Button deleteButton = new Button("Delete Task");
-        deleteButton.setStyle("-fx-background-color: red; -fx-text-fill: white;");
+        deleteButton.setStyle("-fx-background-color: #4da1a4; -fx-text-fill: white;");
         deleteButton.setOnAction(e -> {
             Task selectedTask = taskListView.getSelectionModel().getSelectedItem();
             if (selectedTask != null) {
@@ -176,15 +180,18 @@ public class TODOApp extends Application {
         });
 
         HBox inputFields = new HBox(10, titleField, descriptionField, priorityBox, categoryField, dueDatePicker, addButton, deleteButton);
-        inputFields.setStyle("-fx-background-color: #333; -fx-padding: 10px; -fx-border-color: red; -fx-border-width: 2px;");
+        inputFields.setStyle("-fx-background-color: #333; -fx-padding: 10px; -fx-border-color: #4da1a4; -fx-border-width: 2px;");
 
         root.getChildren().addAll(taskListView, inputFields);
 
         Scene mainScene = new Scene(root, 800, 400);
 
         // Button to navigate to main screen
-        startButton.setOnAction(e -> primaryStage.setScene(mainScene));
-
+        startButton.setOnAction(e -> {
+            // primaryStage.setMaximized(true);
+            primaryStage.setScene(mainScene);
+        });
+        
         primaryStage.setScene(welcomeScene);
         primaryStage.show();
     }
